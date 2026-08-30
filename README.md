@@ -69,9 +69,13 @@ Point a build at a Nextendo Network server (or your own) with these environment 
 | ---------------------------- | ----------------------------------------------------------------- | ---------- |
 | `NEXTENDO_SERVER_IP`         | Address the main online hostnames resolve to.                     | `127.0.0.1`|
 | `NEXTENDO_NAT_IP`            | Address of the second NAT-check responder (required by NAT probe).| `127.0.0.1`|
+| `NEXTENDO_ACNH_DESIGNS_IP`   | Optional address for the ACNH Custom Designs Portal service.      | `NEXTENDO_SERVER_IP` |
 | `NEXTENDO_BAAS_SIGNING_KEY`  | PEM of the RSA key used to sign account `id_token`s. May instead be placed in a `nextendo_baas.pem` file next to the executable. | none (throwaway key) |
 
 If none are set, online features stay dormant and Nextendo runs as a normal offline emulator.
+
+The experimental ACNH Custom Designs Portal service and deployment notes are in
+[docs/acnh-custom-designs.md](docs/acnh-custom-designs.md).
 
 ## System requirements
 

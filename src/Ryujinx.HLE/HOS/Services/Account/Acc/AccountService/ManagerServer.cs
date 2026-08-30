@@ -100,6 +100,28 @@ namespace Ryujinx.HLE.HOS.Services.Account.Acc.AccountService
             return rsa;
         }
 
+        private static byte[] GenerateBaasSubject()
+        {
+            // A BAAS id_token identifies an account, not an emulator session.
+            // Generating a new subject for every launch makes services that keep
+            // account-scoped state (including ACNH's Custom Designs profile)
+            // treat the same linked Nextendo account as a new Nintendo account.
+            //
+            // Derive a stable opaque 128-bit value from the linked persistent
+            // principal id. The value never leaves the token except as its
+            // normal ``sub`` claim and does not expose the principal id itself.
+            if (NextendoAccount.IsLinked)
+            {
+                byte[] seed = Encoding.UTF8.GetBytes($"nextendo-baas-subject-v1:{NextendoAccount.Pid}");
+                byte[] digest = SHA256.HashData(seed);
+                return digest[..0x10];
+            }
+
+            byte[] anonymousSubject = new byte[0x10];
+            RandomNumberGenerator.Fill(anonymousSubject);
+            return anonymousSubject;
+        }
+
         private static string GenerateIdToken()
         {
             RSAParameters parameters = _nextendoIdTokenRsa.ExportParameters(true);
@@ -110,8 +132,7 @@ namespace Ryujinx.HLE.HOS.Services.Account.Acc.AccountService
 
             credentials.Key.KeyId = "nextendo-baas-key-1";
 
-            byte[] rawUserId = new byte[0x10];
-            RandomNumberGenerator.Fill(rawUserId);
+            byte[] rawUserId = GenerateBaasSubject();
 
             byte[] deviceId = new byte[0x10];
             RandomNumberGenerator.Fill(deviceId);
@@ -128,6 +149,18 @@ namespace Ryujinx.HLE.HOS.Services.Account.Acc.AccountService
                 { "bs:did", Convert.ToHexString(deviceAccountId).ToLower() },
                 // NSO membership flag — Splatoon 2 reads this LOCALLY to gate online entry.
                 { "hm", true },
+                // nnAccount validates this nested device descriptor before accepting
+                // the BAAS id_token. Keep it in addition to Nextendo's "nnex"
+                // binding claim below.
+                { "nintendo", new Dictionary<string, object>
+                    {
+                        { "dt", "NX Prod 1" },
+                        { "pc", "HAC" },
+                        { "di", Convert.ToHexString(deviceId).ToLower() },
+                        { "sn", "XAW10000000000" },
+                        { "ist", false },
+                    }
+                },
             };
 
             // [Nextendo] Cryptographic account binding for the NEX login. The game forwards
@@ -165,6 +198,9 @@ namespace Ryujinx.HLE.HOS.Services.Account.Acc.AccountService
             //       Then it searches the Availability of Online Services related to the UserId in this file and returns it.
 
             Logger.Stub?.PrintStub(LogClass.ServiceAcc);
+            Logger.Info?.Print(
+                LogClass.ServiceAcc,
+                $"[Nextendo/ACNH] account availability checked (linked={NextendoAccount.IsLinked}, bound={IsBoundNextendoProfile}, blocked={NextendoAccount.OnlineBlocked}).");
 
             // NOTE: Even if we try to return different error codes here, the guest still needs other calls.
             return ResultCode.Success;
@@ -177,6 +213,9 @@ namespace Ryujinx.HLE.HOS.Services.Account.Acc.AccountService
             //       Then it searches the NetworkServiceAccountId related to the UserId in this file and returns it.
 
             Logger.Stub?.PrintStub(LogClass.ServiceAcc, new { NetworkServiceAccountId });
+            Logger.Info?.Print(
+                LogClass.ServiceAcc,
+                $"[Nextendo/ACNH] network service account ID requested (onlineIdentity={NetworkServiceAccountId != 0xcafe}).");
 
             context.ResponseData.Write(NetworkServiceAccountId);
 
@@ -185,6 +224,9 @@ namespace Ryujinx.HLE.HOS.Services.Account.Acc.AccountService
 
         public ResultCode EnsureIdTokenCacheAsync(ServiceCtx context, out IAsyncContext asyncContext)
         {
+            Logger.Info?.Print(
+                LogClass.ServiceAcc,
+                $"[Nextendo/ACNH] id-token cache async requested (linked={NextendoAccount.IsLinked}, bound={IsBoundNextendoProfile}, blocked={NextendoAccount.OnlineBlocked}).");
             KEvent asyncEvent = new(context.Device.System.KernelContext);
             AsyncExecution asyncExecution = new(asyncEvent);
 
@@ -238,6 +280,9 @@ namespace Ryujinx.HLE.HOS.Services.Account.Acc.AccountService
             {
                 _cachedTokenExpiry = DateTime.UtcNow + TimeSpan.FromHours(3);
                 _cachedTokenData = Encoding.ASCII.GetBytes(GenerateIdToken());
+                Logger.Info?.Print(
+                    LogClass.ServiceAcc,
+                    $"[Nextendo/ACNH] issued BAAS token (linked={NextendoAccount.IsLinked}, bound={IsBoundNextendoProfile}, blocked={NextendoAccount.OnlineBlocked}).");
             }
 
             byte[] tokenData = _cachedTokenData;
@@ -251,6 +296,9 @@ namespace Ryujinx.HLE.HOS.Services.Account.Acc.AccountService
         public ResultCode GetNintendoAccountUserResourceCacheForApplication(ServiceCtx context)
         {
             Logger.Stub?.PrintStub(LogClass.ServiceAcc, new { NetworkServiceAccountId });
+            Logger.Info?.Print(
+                LogClass.ServiceAcc,
+                $"[Nextendo/ACNH] account resource cache requested (linked={NextendoAccount.IsLinked}, bound={IsBoundNextendoProfile}, blocked={NextendoAccount.OnlineBlocked}, outputBuffers={context.Request.ReceiveBuff.Count}).");
 
             context.ResponseData.Write(NetworkServiceAccountId);
 
@@ -268,6 +316,9 @@ namespace Ryujinx.HLE.HOS.Services.Account.Acc.AccountService
 
         public ResultCode LoadNetworkServiceLicenseKindAsync(ServiceCtx context, out IAsyncNetworkServiceLicenseKindContext asyncContext)
         {
+            Logger.Info?.Print(
+                LogClass.ServiceAcc,
+                $"[Nextendo/ACNH] network-service license requested (onlineIdentity={NetworkServiceAccountId != 0xcafe}).");
             KEvent asyncEvent = new(context.Device.System.KernelContext);
             AsyncExecution asyncExecution = new(asyncEvent);
 

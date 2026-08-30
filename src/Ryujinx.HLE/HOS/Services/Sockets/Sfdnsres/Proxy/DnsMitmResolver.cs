@@ -32,6 +32,11 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Sfdnsres.Proxy
         private static readonly (string Pattern, IPAddress Address)[] _builtinRedirects =
         {
             ("nncs2-*.n.n.srv.nintendo.net", ResolveConfiguredIp("NEXTENDO_NAT_IP")),
+            // The ACNH Custom Designs Portal is an HTTP service, not a NEX game server.
+            // Keep it separately routable so a deployment can add the portal without
+            // changing the existing Nextendo reverse-proxy. If it is not configured,
+            // preserve the normal Nextendo routing behaviour.
+            ("api.hac.lp1.acbaa.srv.nintendo.net", ResolveConfiguredIp("NEXTENDO_ACNH_DESIGNS_IP", "NEXTENDO_SERVER_IP")),
             ("*.nintendo.net",     ResolveConfiguredIp("NEXTENDO_SERVER_IP")),
             ("*.nintendo.com",     ResolveConfiguredIp("NEXTENDO_SERVER_IP")),
             ("*.nintendowifi.net", ResolveConfiguredIp("NEXTENDO_SERVER_IP")),
@@ -40,9 +45,10 @@ namespace Ryujinx.HLE.HOS.Services.Sockets.Sfdnsres.Proxy
 
         // Reads a server address from an environment variable; falls back to loopback so no
         // infrastructure address is hardcoded in this open-source tree.
-        private static IPAddress ResolveConfiguredIp(string envVar)
+        private static IPAddress ResolveConfiguredIp(string envVar, string fallbackEnvVar = null)
         {
-            string value = Environment.GetEnvironmentVariable(envVar);
+            string value = Environment.GetEnvironmentVariable(envVar)
+                ?? (fallbackEnvVar == null ? null : Environment.GetEnvironmentVariable(fallbackEnvVar));
 
             if (!IPAddress.TryParse(value, out IPAddress address))
             {
