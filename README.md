@@ -28,6 +28,24 @@ additions are limited to the networking layer and the surrounding user experienc
 > owners. This project ships **no** Nintendo code, keys, or copyrighted assets — you must provide your
 > own legally dumped games and system files, exactly as with upstream Ryujinx.
 
+## Este fork local (não faz parte do upstream Nextendo)
+
+Cópia própria usada para engenharia reversa do protocolo online de **Animal Crossing: New
+Horizons**, especificamente o **ACNH Custom Designs Portal** (upload/download dos códigos
+`MO-XXXX-XXXX-XXXX` de padrões customizados) — o restante do fork acompanha o upstream sem
+modificação.
+
+| pasta/arquivo | conteúdo |
+|---|---|
+| `services/acnh-designs/` | servidor próprio (Python) que implementa a API do portal, pra rodar contra um deploy Nextendo privado |
+| `docs/acnh-custom-designs.md` | detalhes do protocolo e o que já foi validado |
+| `tools/inspect_acnh_save.py` | inspetor read-only de save |
+| `tools/reset_acnh_portal_access.py` | reset (dry-run por padrão) das flags de onboarding do portal |
+| `src/.../ManagerServer.cs`, `.../DnsMitmResolver.cs` | mudanças no core do emulador — subject BAAS estável e rota de DNS pro portal |
+
+Sem segredo commitado — endereços de servidor entram só em build via variável de ambiente
+(`NEXTENDO_SERVER_IP`, `NEXTENDO_ACNH_DESIGNS_IP`), nunca hardcoded.
+
 ## Online support
 
 Online play is currently implemented for the following titles. Each connects to the Nextendo Network
