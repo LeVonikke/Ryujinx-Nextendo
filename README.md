@@ -28,25 +28,25 @@ additions are limited to the networking layer and the surrounding user experienc
 > owners. This project ships **no** Nintendo code, keys, or copyrighted assets — you must provide your
 > own legally dumped games and system files, exactly as with upstream Ryujinx.
 
-## Este fork local (não faz parte do upstream Nextendo)
+## This local fork (not part of upstream Nextendo)
 
-![Status](https://img.shields.io/badge/status-ativo-brightgreen) ![C#](https://img.shields.io/badge/C%23-blue) ![Python](https://img.shields.io/badge/Python-blue)
+![Status](https://img.shields.io/badge/status-active-brightgreen) ![C#](https://img.shields.io/badge/C%23-blue) ![Python](https://img.shields.io/badge/Python-blue)
 
-Cópia própria usada para engenharia reversa do protocolo online de **Animal Crossing: New
-Horizons**, especificamente o **ACNH Custom Designs Portal** (upload/download dos códigos
-`MO-XXXX-XXXX-XXXX` de padrões customizados) — o restante do fork acompanha o upstream sem
-modificação.
+Personal copy used for reverse engineering the online protocol of **Animal Crossing:
+New Horizons**, specifically the **ACNH Custom Designs Portal** (upload/download of
+`MO-XXXX-XXXX-XXXX` custom pattern codes) — the rest of the fork tracks upstream
+unmodified.
 
-| pasta/arquivo | conteúdo |
+| folder/file | content |
 |---|---|
-| `services/acnh-designs/` | servidor próprio (Python) que implementa a API do portal, pra rodar contra um deploy Nextendo privado |
-| `docs/acnh-custom-designs.md` | detalhes do protocolo e o que já foi validado |
-| `tools/inspect_acnh_save.py` | inspetor read-only de save |
-| `tools/reset_acnh_portal_access.py` | reset (dry-run por padrão) das flags de onboarding do portal |
-| `src/.../ManagerServer.cs`, `.../DnsMitmResolver.cs` | mudanças no core do emulador — subject BAAS estável e rota de DNS pro portal |
+| `services/acnh-designs/` | own server (Python) implementing the portal's API, to run against a private Nextendo deployment |
+| `docs/acnh-custom-designs.md` | protocol details and what's already been validated |
+| `tools/inspect_acnh_save.py` | read-only save inspector |
+| `tools/reset_acnh_portal_access.py` | reset (dry-run by default) of the portal's onboarding flags |
+| `src/.../ManagerServer.cs`, `.../DnsMitmResolver.cs` | changes to the emulator core — stable BAAS subject and DNS route to the portal |
 
-Sem segredo commitado — endereços de servidor entram só em build via variável de ambiente
-(`NEXTENDO_SERVER_IP`, `NEXTENDO_ACNH_DESIGNS_IP`), nunca hardcoded.
+No secret committed — server addresses only go in at build time via environment
+variable (`NEXTENDO_SERVER_IP`, `NEXTENDO_ACNH_DESIGNS_IP`), never hardcoded.
 
 ## Online support
 
