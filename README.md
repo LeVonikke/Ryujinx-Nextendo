@@ -30,6 +30,8 @@ additions are limited to the networking layer and the surrounding user experienc
 
 ## Este fork local (não faz parte do upstream Nextendo)
 
+![Status](https://img.shields.io/badge/status-ativo-brightgreen) ![C#](https://img.shields.io/badge/C%23-blue) ![Python](https://img.shields.io/badge/Python-blue)
+
 Cópia própria usada para engenharia reversa do protocolo online de **Animal Crossing: New
 Horizons**, especificamente o **ACNH Custom Designs Portal** (upload/download dos códigos
 `MO-XXXX-XXXX-XXXX` de padrões customizados) — o restante do fork acompanha o upstream sem
